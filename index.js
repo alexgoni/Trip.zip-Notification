@@ -86,6 +86,8 @@ app.post("/send-notification", async (req, res) => {
     };
 
     const result = await sendPushNotification(deviceToken, notification);
+    await docRef.delete();
+
     res.status(200).send(result);
   } catch (error) {
     console.error("Error sending notification:", error);
