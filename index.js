@@ -23,8 +23,6 @@ admin.initializeApp({
 });
 
 const app = express();
-const PORT = 3000;
-
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -33,9 +31,7 @@ const db = admin.firestore();
 app.post("/subscribe", async (req, res) => {
   const { token, id } = req.body;
 
-  if (!token) {
-    return res.status(400).send("Device token is required.");
-  }
+  if (!token) return res.status(400).send("Device token is required.");
 
   try {
     const docRef = db.collection("subscriptions").doc(String(id));
@@ -50,7 +46,6 @@ app.post("/subscribe", async (req, res) => {
   }
 });
 
-// FCM 푸시 알림 전송 함수
 const sendPushNotification = async (deviceToken, notification) => {
   const message = {
     token: deviceToken,
@@ -68,18 +63,14 @@ const sendPushNotification = async (deviceToken, notification) => {
   }
 };
 
-// 푸시 알림 전송 엔드포인트
 app.post("/send-notification", async (req, res) => {
   const { id, title, body } = req.body;
-
-  console.log({ id, title, body });
 
   if (!id || !title || !body) {
     return res.status(400).send("ID, title, and body are required.");
   }
 
   try {
-    // Firestore에서 해당 ID의 문서 가져오기
     const docRef = db.collection("subscriptions").doc(String(id));
     const doc = await docRef.get();
 
@@ -87,7 +78,6 @@ app.post("/send-notification", async (req, res) => {
       return res.status(404).send("No device token found for this ID.");
     }
 
-    // 문서에서 deviceToken 가져오기
     const deviceToken = doc.data().token;
 
     const notification = {
@@ -102,7 +92,5 @@ app.post("/send-notification", async (req, res) => {
     res.status(500).send("Error sending notification");
   }
 });
-// 서버 시작
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+
+module.exports = app;
